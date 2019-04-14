@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tan.dao.WarnDao">
+
+	<resultMap type="Map" id="WarnResult">
+		<result property="id" column="id"/>
+		<result property="goodsId" column="goodsId"/>
+		<result property="stockNum" column="stockNum"/>
+		<result property="limitNum" column="limitNum"/>
+		<result property="goodsName" column="goodsName"/>
+	</resultMap>
+	
+	
+	<!-- 查询 -->
+	<select id="find" parameterType="Map" resultMap="WarnResult">
+		select t1.id,t1.goodsId,t1.goodsName,t2.stockNum,t2.limitNum from t_goods t1,t_stock t2 where t1.id=t2.goodsId		
+			<if test="goodsName!=null and goodsName!=''">
+				and t1.goodsName like "%"#{goodsName}"%"
+			</if>
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_goods t1,t_stock t2 where t1.id=t2.goodsId
+			<if test="goodsName!=null and goodsName!=''">
+				and t1.goodsName like "%"#{goodsName}"%"
+			</if>
+	</select>
+	
+	<select id="warnTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_goods t1,t_stock t2 where t1.id=t2.goodsId and (t2.stockNum-t2.limitNum)&lt;0
+	</select>
+</mapper> 

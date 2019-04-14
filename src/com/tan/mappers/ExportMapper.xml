@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tan.dao.ExportDao">
+
+	<resultMap type="Export" id="ExportResult">
+		<id property="id" column="id"/>
+		<result property="goodsId" column="goodsId"/>
+		<result property="expoPrice" column="expoPrice"/>
+		<result property="expoDate" column="expoDate"/>
+		<result property="expoNum" column="expoNum"/>
+		<result property="expoDesc" column="expoDesc"/>
+		<association property="goods" column="goodsId" select="com.tan.dao.GoodsDao.findById"/>
+	</resultMap>
+	
+	
+	<!-- 查询 -->
+	<select id="find" parameterType="Map" resultMap="ExportResult">
+		select t1.id,t1.goodsId,t2.goodsName,t1.expoPrice,t1.expoDate,t1.expoNum,t1.expoDesc from t_export t1 left join t_goods  t2 on t1.goodsId=t2.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like "%"#{goodsName}"%"
+			</if>
+			<if test="bexpoPrice!=null and bexpoPrice!=''">
+				and expoPrice&gt;=#{bexpoPrice}
+			</if>
+			<if test="eexpoPrice!=null and eexpoPrice!=''">
+				and expoPrice&lt;=#{eexpoPrice}
+			</if>
+			<if test="bexpoDate!=null and bexpoDate!=''">
+				and TO_DAYS(t1.expoDate)&gt;=TO_DAYS(#{bexpoDate})
+			</if>
+			<if test="eexpoDate!=null and eexpoDate!=''">
+				and TO_DAYS(t1.expoDate)&lt;=TO_DAYS(#{eexpoDate})
+			</if>
+		</where>
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_export t1 left join t_goods  t2 on t1.goodsId=t2.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like #{goodsName}
+			</if>
+			<if test="bexpoPrice!=null and bexpoPrice!=''">
+				and expoPrice&gt;=#{bexpoPrice}
+			</if>
+			<if test="eexpoPrice!=null and eexpoPrice!=''">
+				and expoPrice&lt;=#{eexpoPrice}
+			</if>
+			<if test="bexpoDate!=null and bexpoDate!=''">
+				and TO_DAYS(t1.expoDate)&gt;=TO_DAYS(#{bexpoDate})
+			</if>
+			<if test="eexpoDate!=null and eexpoDate!=''">
+				and TO_DAYS(t1.expoDate)&lt;=TO_DAYS(#{eexpoDate})
+			</if>
+		</where>
+	</select>
+
+	<!-- 添加 -->
+	<insert id="add" parameterType="Export">
+		insert into t_export values(null,#{goodsId},#{stockId},#{expoPrice},#{expoDate},#{expoNum},#{expoDesc})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="Export">
+		update t_export set goodsId=#{goodsId},expoPrice=#{expoPrice},expoDate=#{expoDate},expoNum=#{expoNum},expoDesc=#{expoDesc} where id=#{id}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Integer">
+		delete from t_export where id=#{id}
+	</delete>
+	
+	<!-- 导出数据 -->
+	<select id="exportData" resultMap="ExportResult">
+		select t1.goodsId,t2.goodsName,t1.expoPrice,t1.expoDate,t1.expoNum,t1.expoDesc from t_export t1 left join t_goods  t2 on t1.goodsId=t2.id
+	</select>
+	
+	<!--根据goodsId查询出库商品  -->
+	<select id="getExportByGoodsId" parameterType="Integer" resultType="long">
+		select count(*) from t_export where goodsId=#{id}
+	</select>
+	
+	<select id="getExportByStockId" parameterType="Integer" resultType="long">
+		select count(*) from t_export where stockId=#{id}
+	</select>
+</mapper> 

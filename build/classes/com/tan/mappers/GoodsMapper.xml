@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tan.dao.GoodsDao">
+
+	<!-- <resultMap type="Goods" id="GoodsResult">
+		<id property="id" column="id"/>
+		<result property="goodsId" column="goodsId"/>
+		<result property="goodsName" column="goodsName"/>
+		<result property="expireTime" column="expireTime"/>
+		<result property="goodsDesc" column="goodsDesc"/>
+		<result property="proName" column="proName"/>
+		<result property="typeName" column="typeName"/>
+		一对一关系查询
+		<association property="provider" column="proId" select="com.tan.dao.ProviderDao.findById"/>
+		<association property="goodsType" column="typeId" select="com.tan.dao.GoodsTypeDao.findById"/> 
+	</resultMap> -->
+	
+	
+	<!-- 查询 -->
+	<select id="find" parameterType="Map" resultType="Goods">
+		SELECT t1.typeName,t2.proName,t3.id,t3.goodsId,t3.goodsName,t3.expireTime,t3.proId,t3.typeId,t3.goodsDesc FROM t_goodsType t1,t_provider t2,t_goods t3 WHERE t3.proId=t2.id and t1.id=t3.typeId
+			<if test="goodsId!=null and goodsId!=''">
+				and t3.goodsId like #{goodsId}
+			</if>
+			<if test="goodsName!=null and goodsName!=''">
+				and t3.goodsName like #{goodsName}
+			</if>
+			<if test="proId!=null and proId!=''">
+				and t3.proId=#{proId}
+			</if>
+			<if test="typeId!=null and typeId!=''">
+				and t3.typeId=#{typeId}
+			</if>
+				order by t3.id asc
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_goodstype tgt,t_provider tp,t_goods tg where tg.proId=tp.id and tg.typeId=tgt.id 
+			<if test="goodsId!=null and goodsId!=''">
+				and tg.goodsId like #{goodsId}
+			</if>
+			<if test="goodsName!=null and goodsName!=''">
+				and tg.goodsName like #{goodsName}
+			</if>
+			<if test="proId!=null and proId!=''">
+				and tg.proId=#{proId}
+			</if>
+			<if test="typeId!=null and typeId!=''">
+				and tg.typeId=#{typeId}
+			</if>
+			order by tg.id asc
+	</select>
+	
+	<!-- 根据主键id查询 -->
+	<select id="findById" parameterType="Integer" resultType="Goods">
+		select * from t_goods where id=#{id}
+	</select>
+
+	<!-- 添加 -->
+	<insert id="add" parameterType="Goods">
+		insert into t_goods values(null,#{goodsId},#{goodsName},#{expireTime},#{proId},#{typeId},#{goodsDesc})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="Goods">
+		update t_goods set goodsId=#{goodsId},goodsName=#{goodsName},expireTime=#{expireTime},proId=#{proId},typeId=#{typeId},goodsDesc=#{goodsDesc} where id=#{id}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Integer">
+		delete from t_goods where id=#{id}
+	</delete>
+	
+	<!-- 导出数据 -->
+	<select id="exportData" resultType="Goods">
+		SELECT t1.typeName,t2.proName,t3.goodsId,t3.expireTime,t3.goodsName,t3.goodsDesc FROM t_goodsType t1,t_provider t2,t_goods t3 WHERE t3.proId=t2.id and t1.id=t3.typeId
+	</select>
+	
+	<!-- 根据供应商编号查询商品 -->
+	<select id="getGoodsByProId" parameterType="Integer" resultType="long">
+		select count(*) from t_goods where proId=#{id}
+	</select>
+	
+	<!-- 根据商品类型编号查询商品  -->
+	<select id="getGoodsByTypeId" parameterType="Integer" resultType="Long">
+		select count(*) from t_goods where typeId=#{id}
+	</select>
+</mapper> 

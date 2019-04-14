@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tan.dao.ImportDao">
+
+	<resultMap type="Import" id="ImportResult">
+		<id property="id" column="id"/>
+		<result property="impoPrice" column="impoPrice"/>
+		<result property="impoDate" column="impoDate"/>
+		<result property="impoNum" column="impoNum"/>
+		<result property="impoDesc" column="impoDesc"/>
+		<result property="goodsName" column="goodsName"/>
+		<!-- <association property="goods" column="goodsId" select="com.tan.dao.GoodsDao.findById"/> -->
+	</resultMap>
+	
+	
+	<!-- 查询 -->
+	<select id="find" parameterType="Map" resultMap="ImportResult">
+		select t1.id,t1.goodsId,t2.goodsName,t1.impoPrice,t1.impoDate,t1.impoNum,t1.impoDesc from t_import t1 left join t_goods  t2 on t1.goodsId=t2.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like "%"#{goodsName}"%"
+			</if>
+			<if test="bimpoPrice!=null and bimpoPrice!=''">
+				and impoPrice&gt;=#{bimpoPrice}
+			</if>
+			<if test="eimpoPrice!=null and eimpoPrice!=''">
+				and impoPrice&lt;=#{eimpoPrice}
+			</if>
+			<if test="bimpoDate!=null and bimpoDate!=''">
+				and TO_DAYS(t1.impoDate)&gt;=TO_DAYS(#{bimpoDate})
+			</if>
+			<if test="eimpoDate!=null and eimpoDate!=''">
+				and TO_DAYS(t1.impoDate)&lt;=TO_DAYS(#{eimpoDate})
+			</if>
+		</where>
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_import t1 left join t_goods  t2 on t1.goodsId=t2.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like #{goodsName}
+			</if>
+			<if test="bimpoPrice!=null and bimpoPrice!=''">
+				and impoPrice&gt;=#{bimpoPrice}
+			</if>
+			<if test="eimpoPrice!=null and eimpoPrice!=''">
+				and impoPrice&lt;=#{eimpoPrice}
+			</if>
+			<if test="bimpoDate!=null and bimpoDate!=''">
+				and TO_DAYS(t1.impoDate)&gt;=TO_DAYS(#{bimpoDate})
+			</if>
+			<if test="eimpoDate!=null and eimpoDate!=''">
+				and TO_DAYS(t1.impoDate)&lt;=TO_DAYS(#{eimpoDate})
+			</if>
+		</where>
+	</select>
+
+	<!-- 添加 -->
+	<insert id="add" parameterType="Import">
+		insert into t_import values(null,#{goodsId},#{impoPrice},#{impoDate},#{impoNum},#{impoDesc})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="Import">
+		update t_import set goodsId=#{goodsId},impoPrice=#{impoPrice},impoDate=#{impoDate},impoNum=#{impoNum},impoDesc=#{impoDesc} where id=#{id}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Integer">
+		delete from t_import where id=#{id}
+	</delete>
+	
+	<!-- 导出数据 -->
+	<select id="exportData" resultMap="ImportResult">
+		select t2.goodsName,t1.impoPrice,t1.impoDate,t1.impoNum,t1.impoDesc from t_import t1 left join t_goods  t2 on t1.goodsId=t2.id
+	</select>
+	
+	<!-- 根据goodsId查询入存商品 -->
+	<select id="getImportByGoodsId" parameterType="Integer" resultType="long">
+		select count(*) from t_import where goodsId=#{id}
+	</select>
+</mapper> 

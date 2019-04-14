@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tan.dao.ProfitDao">
+
+	<resultMap type="Map" id="ProfitResult">
+		<result property="id" column="id"/>
+		<result property="goodsId" column="goodsId"/>
+		<result property="impoPrice" column="impoPrice"/>
+		<result property="expoPrice" column="expoPrice"/>
+		<result property="expoNum" column="expoNum"/>
+		<result property="profit" column="profit"/>
+		<result property="goodsName" column="goodsName"/>
+	</resultMap>
+	
+	
+	<!-- 查询 -->
+	<select id="find" parameterType="Map" resultMap="ProfitResult">
+		select t1.id,t2.goodsId,t2.goodsName,t1.expoNum,t3.impoPrice,t1.expoPrice,(CONVERT(t1.expoPrice,DECIMAL)-CONVERT(t3.impoPrice,DECIMAL))*t1.expoNum as profit from t_export t1 left join t_goods  t2 on t1.goodsId=t2.id left join t_stock t3 on t1.stockId=t3.id 
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like "%"#{goodsName}"%"
+			</if>
+		</where>
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_export t1 left join t_goods  t2 on t1.goodsId=t2.id left join t_stock t3 on t1.stockId=t3.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like "%"#{goodsName}"%"
+			</if>
+		</where>
+	</select>
+
+	<select id="profitTotal" parameterType="Map" resultType="long">
+		select sum((CONVERT(t1.expoPrice,DECIMAL)-CONVERT(t3.impoPrice,DECIMAL))*t1.expoNum) as total from t_export t1 left join t_goods t2 on t1.goodsId=t2.id left join t_stock t3 on t1.stockId=t3.id
+	</select>
+</mapper> 

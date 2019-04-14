@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tan.dao.StockDao">
+
+	<resultMap type="Stock" id="StockResult">
+		<id property="id" column="id"/>
+		<result property="goodsId" column="goodsId"/>
+		<!-- <result property="importId" column="importId"/> -->
+		<result property="stockNum" column="stockNum"/>
+		<result property="limitNum" column="limitNum"/>
+		<result property="impoPrice" column="impoPrice"/>
+		<result property="expoPrice" column="expoPrice"/>
+		<result property="stockDesc" column="stockDesc"/>
+		<association property="goods" javaType="Goods">
+			<result property="goodsName" column="goodsName"/>
+		</association>
+	</resultMap>
+	
+	
+	<!-- 查询 -->
+	<select id="find" parameterType="Map" resultMap="StockResult">
+		select t1.id,t1.goodsId,t2.goodsName,t1.stockNum,t1.limitNum,t1.impoPrice,t1.expoPrice,t1.stockDesc from t_stock t1 left join t_goods  t2 on t1.goodsId=t2.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like "%"#{goodsName}"%"
+			</if>
+			<if test="bimpoPrice!=null and bimpoPrice!=''">
+				and impoPrice&gt;=#{bimpoPrice}
+			</if>
+			<if test="eimpoPrice!=null and eimpoPrice!=''">
+				and impoPrice&lt;=#{eimpoPrice}
+			</if>
+			<if test="bexpoPrice!=null and bexpoPrice!=''">
+				and expoPrice&gt;=#{bexpoPrice}
+			</if>
+			<if test="eexpoPrice!=null and eexpoPrice!=''">
+				and expoPrice&lt;=#{eexpoPrice}
+			</if>
+		</where>
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="long">
+		select count(*) as total from t_stock t1 left join t_goods  t2 on t1.goodsId=t2.id
+		<where>
+			<if test="goodsName!=null and goodsName!=''">
+				and t2.goodsName like "%"#{goodsName}"%"
+			</if>
+			<if test="bimpoPrice!=null and bimpoPrice!=''">
+				and impoPrice&gt;=#{bimpoPrice}
+			</if>
+			<if test="eimpoPrice!=null and eimpoPrice!=''">
+				and impoPrice&lt;=#{eimpoPrice}
+			</if>
+			<if test="bexpoPrice!=null and bexpoPrice!=''">
+				and expoPrice&gt;=#{bexpoPrice}
+			</if>
+			<if test="eexpoPrice!=null and eexpoPrice!=''">
+				and expoPrice&lt;=#{eexpoPrice}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="add" parameterType="Stock">
+		insert into t_stock values(null,#{goodsId},#{importId},#{stockNum},#{limitNum},#{impoProce},#{expoPrice},#{stockDesc})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="Stock">
+		update t_stock set goodsId=#{goodsId},stockNum=#{stockNum},limitNum=#{limitNum},impoPrice=#{impoPrice},expoPrice=#{expoPrice},stockDesc=#{stockDesc} where id=#{id}	
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Integer">
+		delete from t_stock where id=#{id}
+	</delete>
+	
+	<!-- 根据goodsId查询库存商品 -->
+	<select id="getStockByGoodsId" parameterType="Integer" resultType="long">
+		select count(*) from t_stock where goodsId=#{id}
+	</select>
+	
+	<!-- 根据importId查询库存商品  -->
+	<select id="getStockByImportId" parameterType="Integer" resultType="long">
+		select count(*) from t_stock where importId=#{id}
+	</select>
+</mapper> 
